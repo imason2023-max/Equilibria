@@ -2,7 +2,6 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: "https://equilibria-backend-g5oa.onrender.com",
-  withCredentials: true,
 });
 
 // ===============================
