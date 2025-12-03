@@ -13,4 +13,4 @@ to generate a daily recovery score and training recommendation (heavy, light, or
 
 ## Getting Started
 
-See `docs/ARCHITECTURE.md` and `docs/SETUP_GUIDE.md` (if you add one) for details.
+See `docs/ARCHITECTURE.md` and `docs/SETUP_GUIDE.md` for details.
