@@ -76,3 +76,66 @@ Weekly summaries and progress analytics.
 ### Option A — Docker (Recommended)
 ```bash
 docker-compose up --build
+```
+
+### Option B — Local (Uvicorn)
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+## 🧪 Testing
+- **Swagger UI**
+- **Interactive API documentation is available at:**
+```bash
+http://localhost:8000/docs
+```
+Use the built-in “Try It Out” feature to test individual endpoints.
+
+## Pytest Suite
+**A collection of automated tests is included to ensure reliability of the API and logic components.
+Run all tests:**
+```bash
+pytest
+```
+**These tests include:**
+- Endpoint response validation
+- Error and edge-case handling
+- Recovery-engine logic tests
+
+## React Native UI Test (Kadeem’s Component)
+If applicable, run the UI test included with the Daily Recovery screen:
+```bash
+npm test
+```
+
+## 🛠 Additional Tools
+**Admin Dashboard**
+An  HTML dashboard is available for quick backend inspection and debugging:
+```bash
+admin_dashboard.html
+```
+
+## 🌐 Deployment
+The backend supports cloud deployment and containerization. It is compatible with:
+**Render — backend hosting + PostgreSQL**
+**Docker — containerized development and production builds**
+**Upstash Redis — caching layer for performance optimizations**
+Deployment is handled using a combination of Docker, environment variables, and platform-specific build hooks.
+
+---
+
+## 👥 Developer Contributions
+# Dwain
+- Designed and implemented the main backend architecture
+- Built authentication system, workout routes, and database layer
+- Set up Docker configuration, Redis caching, Celery workers, and deployment pipeline
+# Fenthon
+- Developed the primary recovery engine, including scoring and recommendation logic
+- Implemented progression and intensity rules
+- Integrated recovery algorithms into the backend’s routing and service architecture
+# Kadeem
+- Added a supplemental recovery engine implementation
+- Contributed additional endpoints (insights, profile, status checks)
+- Created Pytest test suite and a lightweight admin dashboard for debugging
+---
