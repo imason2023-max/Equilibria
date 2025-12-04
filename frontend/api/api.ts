@@ -2,13 +2,12 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: "https://equilibria-backend-g5oa.onrender.com",
+  withCredentials: true,
 });
 
-// ===============================
-// AUTH ENDPOINTS
-// ===============================
+
 export const AuthAPI = {
-  // REGISTER
+  
   register: async (data: {
     email: string;
     username: string;
@@ -18,10 +17,10 @@ export const AuthAPI = {
     return res.data;
   },
 
-  // LOGIN — FastAPI OAuth2 uses form-urlencoded
+  
   login: async (data: { email: string; password: string }) => {
     const form = new URLSearchParams();
-    form.append("username", data.email); // backend expects "username"
+    form.append("username", data.email); 
     form.append("password", data.password);
 
     const res = await api.post("/api/v1/auth/login", form, {
@@ -30,10 +29,10 @@ export const AuthAPI = {
       },
     });
 
-    return res.data; // { access_token, token_type }
+    return res.data; 
   },
 
-  // GET CURRENT USER (JWT)
+  
   getMe: async (token: string) => {
     const res = await api.get("/api/v1/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
@@ -42,11 +41,9 @@ export const AuthAPI = {
   },
 };
 
-// ===============================
-// RECOVERY ENDPOINTS
-// ===============================
+
 export const RecoveryAPI = {
-  // POST /recovery/log
+  
   log: async (
     data: {
       sleep_hours: number;
@@ -54,6 +51,7 @@ export const RecoveryAPI = {
       soreness_level: number;
       energy_level: number;
       stress_level: number;
+      hrv_rmssd: number; 
     },
     token: string
   ) => {
@@ -63,18 +61,24 @@ export const RecoveryAPI = {
     return res.data;
   },
 
-  // GET /recovery/latest
+  
   latest: async (token: string) => {
-    const res = await api.get("/api/v1/recovery/latest", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
+    try {
+      const res = await api.get("/api/v1/recovery/latest", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    } catch (err: any) {
+      
+      if (err.response?.status === 404) {
+        return null; 
+      }
+      throw err; 
+    }
   },
 };
 
-// ===============================
-// WEARABLE SYNC ENDPOINTS
-// ===============================
+
 export const WearableAPI = {
   sync: async (
     data: {
@@ -100,9 +104,7 @@ export const WearableAPI = {
   },
 };
 
-// ===============================
-// WORKOUT CREATION ENDPOINT
-// ===============================
+
 export const WorkoutAPI = {
   create: async (
     data: {
@@ -121,9 +123,7 @@ export const WorkoutAPI = {
   },
 };
 
-// ===============================
-// WORKOUT SESSION ENDPOINT
-// ===============================
+
 export const WorkoutSessionAPI = {
   log: async (
     data: {
