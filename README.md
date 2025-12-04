@@ -1,6 +1,6 @@
 # Equilibria – Recovery-Driven Training Companion
 
-### Project Memebers: Ian Mason, Dwain Nicholson, Fenthon, Andrew Naranjo, Kadeem Wilks
+### Project Memebers: Ian Mason, Dwain Nicholson, Fenthon Aristhomene, Andrew Naranjo, Kadeem Wilks
 
 Equilibria is a fitness and lifting app that helps lifters make smarter training decisions by focusing on **recovery first**.  
 Instead of just tracking sets and reps, Equilibria combines **daily check-ins**, **HRV and wearable data**, and **workout logging** to compute a recovery score and suggest whether users should train heavy, go lighter, or rest.
