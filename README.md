@@ -14,6 +14,10 @@ This repo contains the **final integrated version** of the project, including:
 
 ---
 
+# TO GET STARTED:
+- Visit `docs/GETTING_STARTED.md` – it breaks down everything you need to start using our app.
+
+
 ## 🌟 Key Features
 
 - **User Authentication**  
