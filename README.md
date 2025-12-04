@@ -68,7 +68,8 @@ For full diagrams and deep-dive details, see:
 - `docs/ARCHITECTURE.md` – Architecture, data flow, and database schema  
 - `backend/README.md` – Backend endpoints, stack, and setup  
 - `docs/TEAM_ROLES.md` – Breakdown of team responsibilities
-- `frontend/README.md` – Frontend endpoints, stack, and setup  
+- `frontend/README.md` – Frontend endpoints, stack, and setup
+- `docs/USE_CASES.md` - Use Cases Included
 
 ---
 
@@ -98,3 +99,9 @@ For full diagrams and deep-dive details, see:
 │
 │
 └── README.md                # This file – top-level project overview
+```
+
+## 📌 Notes
+This project is a prototype focused on core functionality: recovery scoring, recommendations, workout planning, and historical insights.
+Wearable integrations (Apple Health, Google Fit, BLE sensors) are architected but may rely on mocked/simulated data in this phase.
+The app currently runs via Expo dev environment and a deployed FastAPI backend hosted on Render.
