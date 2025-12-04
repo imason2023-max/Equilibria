@@ -1,5 +1,7 @@
 # Equilibria System Architecture
 
+**Director: Ian Mason**
+
 ## Overview
 
 Equilibria is a recovery-focused fitness application that helps users optimize their training by monitoring recovery metrics and providing intelligent workout recommendations. The system uses a modern microservices architecture with a React Native mobile frontend, FastAPI backend, and PostgreSQL database.
