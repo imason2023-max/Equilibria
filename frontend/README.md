@@ -1,5 +1,7 @@
 # Equilibria Frontend (Developer Overview)
 
+**Drafted by Ian Mason, verified by Andrew Naranjo**
+
 This folder contains the full React Native (Expo) frontend for **Equilibria**, a recovery-focused fitness and workout logging app.
 
 This README explains how the frontend is organized, how it communicates with the backend, and how to contribute to the codebase.
@@ -30,12 +32,15 @@ frontend/
 │   └── hooks/           # Custom hooks (optional, depending on code)
 │
 ├── api/
-│   ├── config.ts        # Backend base URL (edit this when switching environments)
-│   └── client.ts        # Reusable authenticated API fetch wrapper
+│   └── config.ts        # Backend base URL (edit this when switching environments)
 │
 ├── assets/              # Icons, images, fonts
 │
-├── App.tsx              # App entry point (navigation container)
+├── app.json
+├── babel.config.js
+├── eslint.config.js
+├── tsconfig.json
+├── package-lock.json           
 ├── package.json
 └── README.md            # (This file)
 ```
@@ -224,36 +229,6 @@ npm install
 4. `apiFetch` automatically includes token in subsequent requests
 5. On logout, token is removed and user returns to auth stack
 
----
-
-## 🎯 Best Practices
-
-- **Keep screens focused** — One screen, one responsibility
-- **Reuse components** — Create shared components in `/components/`
-- **Use TypeScript** — Type your props and API responses
-- **Handle errors gracefully** — Show user-friendly messages
-- **Test on multiple devices** — iOS, Android, and web when possible
-
----
-
-## 📚 Additional Resources
-
-- [Expo Documentation](https://docs.expo.dev/)
-- [React Navigation Docs](https://reactnavigation.org/)
-- [React Native Docs](https://reactnative.dev/)
-- [AsyncStorage Guide](https://react-native-async-storage.github.io/async-storage/)
-
----
-
-## 🤝 Contributing
-
-When contributing to the frontend:
-
-1. Follow the existing folder structure
-2. Use consistent naming conventions
-3. Write clear commit messages
-4. Test your changes on at least one platform
-5. Update this README if you add new patterns or structure
 
 ---
 
