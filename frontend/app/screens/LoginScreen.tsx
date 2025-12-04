@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { AuthAPI } from "../../api/api"; // ensure path valid
+import { AuthAPI } from "../../api/api"; 
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
@@ -24,7 +24,14 @@ export default function LoginScreen({ navigation }: any) {
     try {
       setLoading(true);
 
-      // 1️⃣ LOGIN (returns token only)
+      
+      await AsyncStorage.removeItem("CHECKIN_HISTORY");
+      await AsyncStorage.removeItem("WORKOUT_HISTORY");
+      await AsyncStorage.removeItem("WORKOUT_SESSIONS");
+      await AsyncStorage.removeItem("LATEST_RECOVERY");
+      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("auth_token");
+    
       const res = await AuthAPI.login({
         email,
         password,
@@ -35,10 +42,10 @@ export default function LoginScreen({ navigation }: any) {
         throw new Error("No access token returned");
       }
 
-      // Save token locally
+
       await AsyncStorage.setItem("auth_token", token);
 
-      // 2️⃣ FETCH USER INFO WITH TOKEN
+      
       const userRes = await fetch(
         "https://equilibria-backend-g5oa.onrender.com/api/v1/auth/me",
         {
@@ -56,7 +63,7 @@ export default function LoginScreen({ navigation }: any) {
       await AsyncStorage.setItem("user", JSON.stringify(user));
 
       Alert.alert("Success", "You are now logged in!");
-      navigation.navigate("Tabs");  // ⬅️ MAIN FIX HERE
+      navigation.navigate("Tabs"); 
 
     } catch (err: any) {
       console.log("Login error:", err?.response?.data || err.message);
@@ -72,7 +79,7 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
-  // 🚀 3️⃣ Developer Skip Login Button
+  
   const skipLogin = async () => {
     await AsyncStorage.setItem("auth_token", "dev-token");
     await AsyncStorage.setItem(
@@ -84,7 +91,6 @@ export default function LoginScreen({ navigation }: any) {
       })
     );
 
-    // ⬅️ UPDATED: Go to Tabs, not Dashboard
     navigation.reset({
       index: 0,
       routes: [{ name: "Tabs" }],
@@ -131,7 +137,7 @@ export default function LoginScreen({ navigation }: any) {
           <Text style={styles.registerText}>Create an Account</Text>
         </TouchableOpacity>
 
-        {/* 🚀 Developer Mode Skip Login Button */}
+        {/*  Developer Mode Skip Login Button */}
         <TouchableOpacity style={styles.skipButton} onPress={skipLogin}>
           <Text style={styles.skipButtonText}>Skip Login (Developer Mode)</Text>
         </TouchableOpacity>
