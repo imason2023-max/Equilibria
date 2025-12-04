@@ -20,9 +20,7 @@ import DraggableFlatList, {
 import { WorkoutAPI } from "../../api/api";
 import BackButton from "../components/BackButton";
 
-// ------------------------------
-// TEMPLATE TYPES
-// ------------------------------
+
 type TemplateName =
   | "Push Day"
   | "Pull Day"
@@ -31,9 +29,7 @@ type TemplateName =
   | "Lower Body"
   | "Full Body";
 
-// ------------------------------
-// CUSTOM TEMPLATES
-// ------------------------------
+
 const templates: Record<TemplateName, string[]> = {
   "Push Day": [
     "Incline Press",
@@ -67,14 +63,7 @@ const templates: Record<TemplateName, string[]> = {
     "Lat Row",
     "Bicep Curl",
   ],
-  "Lower Body": [
-    "Hamstring Curl",
-    "Squat Pattern",
-    "Leg Extensions",
-    "Adductors",
-    "Calves",
-    "Abs",
-  ],
+  "Lower Body": ["Hamstring Curl", "Squat Pattern", "Leg Extensions", "Adductors", "Calves", "Abs"],
   "Full Body": [
     "Upper Back Row",
     "Lat Pulldown",
@@ -96,9 +85,7 @@ const templates: Record<TemplateName, string[]> = {
   ],
 };
 
-// ------------------------------
-// MAIN SCREEN
-// ------------------------------
+
 export default function WorkoutBuilderScreen({ navigation }: any) {
   const exerciseLibrary = Array.from(new Set(Object.values(templates).flat()));
 
@@ -141,9 +128,7 @@ export default function WorkoutBuilderScreen({ navigation }: any) {
 
   const clearWorkout = () => setSelectedExercises([]);
 
-  // ------------------------------
-  // SAVE WORKOUT LOCALLY + SYNC
-  // ------------------------------
+ 
   const saveWorkout = async () => {
     if (selectedExercises.length === 0) {
       Alert.alert("Empty Workout", "Add at least one exercise.");
@@ -163,10 +148,18 @@ export default function WorkoutBuilderScreen({ navigation }: any) {
     };
 
     try {
-      const existing = await AsyncStorage.getItem("WORKOUT_HISTORY");
+      
+      const userStr = await AsyncStorage.getItem("user"); 
+      const user = userStr ? JSON.parse(userStr) : null;
+      const userId = user?.id ?? "default";
+
+      const key = `WORKOUT_HISTORY_${userId}`; 
+
+      const existing = await AsyncStorage.getItem(key);
       const history = existing ? JSON.parse(existing) : [];
+
       history.unshift(localWorkout);
-      await AsyncStorage.setItem("WORKOUT_HISTORY", JSON.stringify(history));
+      await AsyncStorage.setItem(key, JSON.stringify(history));
     } catch (err) {
       console.log("Local error: ", err);
     }
@@ -184,13 +177,19 @@ export default function WorkoutBuilderScreen({ navigation }: any) {
 
         const backendRes = await WorkoutAPI.create(payload, token);
 
-        const existing = await AsyncStorage.getItem("WORKOUT_HISTORY");
+        
+        const userStr = await AsyncStorage.getItem("user"); // <-- FIXED
+        const user = userStr ? JSON.parse(userStr) : null;
+        const userId = user?.id ?? "default";
+        const key = `WORKOUT_HISTORY_${userId}`;
+
+        const existing = await AsyncStorage.getItem(key);
         const history = existing ? JSON.parse(existing) : [];
 
         history[0].synced = true;
         history[0].backend_id = backendRes.id;
 
-        await AsyncStorage.setItem("WORKOUT_HISTORY", JSON.stringify(history));
+        await AsyncStorage.setItem(key, JSON.stringify(history));
 
         Alert.alert("Success", "Workout synced with backend!");
       } else {
@@ -204,9 +203,8 @@ export default function WorkoutBuilderScreen({ navigation }: any) {
     navigation.goBack();
   };
 
-  // ------------------------------
-  // RENDER DRAGGABLE ITEM
-  // ------------------------------
+  
+  
   const renderExercise = ({
     item,
     drag,
@@ -278,9 +276,7 @@ export default function WorkoutBuilderScreen({ navigation }: any) {
     );
   };
 
-  // ------------------------------
-  // RENDER
-  // ------------------------------
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -328,7 +324,7 @@ export default function WorkoutBuilderScreen({ navigation }: any) {
           </View>
         </ScrollView>
 
-        {/* DRAGGABLE LIST BELOW — NO NESTED SCROLL ISSUES */}
+        {/* DRAGGABLE LIST BELOW */}
         <View style={{ flex: 1 }}>
           <DraggableFlatList
             data={selectedExercises}
@@ -353,9 +349,7 @@ export default function WorkoutBuilderScreen({ navigation }: any) {
   );
 }
 
-// ------------------------------
-// STYLES
-// ------------------------------
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
