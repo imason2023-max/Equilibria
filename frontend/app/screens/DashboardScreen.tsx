@@ -15,6 +15,14 @@ export default function DashboardScreen({ navigation, route }: any) {
   const [recommendation, setRecommendation] = useState<string>("--");
   const [pendingSync, setPendingSync] = useState<number>(0);
 
+
+  const [weeklyAvg, setWeeklyAvg] = useState("--");
+  const [weeklyWorkouts, setWeeklyWorkouts] = useState("--");
+  const [weeklyRestDays, setWeeklyRestDays] = useState("--");
+
+ 
+  const [overtrainingRisk, setOvertrainingRisk] = useState("--");
+
   const getRecommendation = (score: number) => {
     if (score >= 8) return "High Recovery – Train Hard 💪";
     if (score >= 5) return "Moderate Recovery – Normal Training";
@@ -55,6 +63,80 @@ export default function DashboardScreen({ navigation, route }: any) {
     }
   };
 
+  // ⭐ WEEKLY SUMMARY + OVERTRAINING RISK (Option A added)
+  const loadWeeklySummary = async () => {
+    try {
+      const historyStr = await AsyncStorage.getItem("CHECKIN_HISTORY");
+      if (!historyStr) return;
+
+      const checks = JSON.parse(historyStr);
+
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      const thisWeek = checks.filter((e: any) => {
+        return new Date(e.timestamp) >= weekAgo;
+      });
+
+     
+      if (thisWeek.length > 0) {
+        const avg =
+          thisWeek.reduce((sum: number, e: any) => sum + e.recoveryScore, 0) /
+          thisWeek.length;
+
+        setWeeklyAvg(avg.toFixed(1));
+
+      
+        let risk = "--";
+
+        const wStr = await AsyncStorage.getItem("WORKOUT_HISTORY");
+        let workoutsThisWeek = 0;
+
+        if (wStr) {
+          const workouts = JSON.parse(wStr);
+          workoutsThisWeek = workouts.filter(
+            (w: any) => new Date(w.timestamp) >= weekAgo
+          ).length;
+        }
+
+        if (avg < 5 && workoutsThisWeek >= 2) {
+          risk = "High Risk 🚨";
+        } else if (avg < 7 && workoutsThisWeek >= 2) {
+          risk = "Medium Risk ⚠️";
+        } else {
+          risk = "Low Risk ✅";
+        }
+
+        setOvertrainingRisk(risk);
+      } else {
+        setWeeklyAvg("--");
+        setOvertrainingRisk("--");
+      }
+
+     
+      const workoutStr = await AsyncStorage.getItem("WORKOUT_HISTORY");
+      if (workoutStr) {
+        const workouts = JSON.parse(workoutStr);
+        const weekWorkouts = workouts.filter(
+          (w: any) => new Date(w.timestamp) >= weekAgo
+        );
+        setWeeklyWorkouts(weekWorkouts.length.toString());
+      } else {
+        setWeeklyWorkouts("0");
+      }
+
+      
+      const daysSet = new Set(
+        thisWeek.map((e: any) => new Date(e.timestamp).toDateString())
+      );
+
+      const rest = 7 - daysSet.size;
+      setWeeklyRestDays(rest.toString());
+    } catch (err) {
+      console.log("Error loading weekly summary:", err);
+    }
+  };
+
   const loadDashboard = async () => {
     try {
       const backendWorked = await loadBackendRecovery();
@@ -78,6 +160,9 @@ export default function DashboardScreen({ navigation, route }: any) {
       }
 
       setPendingSync(pending);
+
+     
+      await loadWeeklySummary();
     } catch (err) {
       console.log("Error loading dashboard:", err);
     }
@@ -106,7 +191,7 @@ export default function DashboardScreen({ navigation, route }: any) {
         )}
       </View>
 
-      {/* RECOVERY SCORE */}
+      {/* TODAY SCORE */}
       <View style={styles.recoveryCard}>
         <Text style={styles.recoveryLabel}>Today's Recovery Score</Text>
 
@@ -119,7 +204,7 @@ export default function DashboardScreen({ navigation, route }: any) {
         </Text>
       </View>
 
-      {/* TODAY'S RECOMMENDATION */}
+      {/* TODAY RECOMMENDATION */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Today's Recommendation</Text>
         <Text style={styles.cardValue}>
@@ -136,17 +221,22 @@ export default function DashboardScreen({ navigation, route }: any) {
       {/* WEEKLY SUMMARY */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>This Week’s Summary</Text>
-        <Text style={styles.cardSubtitle}>Avg Recovery: --</Text>
-        <Text style={styles.cardSubtitle}>Workouts Logged: --</Text>
-        <Text style={styles.cardSubtitle}>Rest Days: --</Text>
+        <Text style={styles.cardSubtitle}>Avg Recovery: {weeklyAvg}</Text>
+        <Text style={styles.cardSubtitle}>
+          Workouts Logged: {weeklyWorkouts}
+        </Text>
+        <Text style={styles.cardSubtitle}>Rest Days: {weeklyRestDays}</Text>
       </View>
 
-      {/* OVERTRAINING */}
+      {/* ⭐ OVERTRAINING RISK (option A) */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Overtraining Risk</Text>
-        <Text style={styles.cardValue}>--</Text>
+        <Text style={styles.cardValue}>{overtrainingRisk}</Text>
+
         <Text style={styles.cardSubtitle}>
-          Complete a check-in to see status.
+          {overtrainingRisk === "--"
+            ? "Complete a check-in to see status."
+            : "Based on recovery & training load."}
         </Text>
       </View>
 
@@ -158,7 +248,7 @@ export default function DashboardScreen({ navigation, route }: any) {
         </Text>
       </View>
 
-      {/* ⭐ WORKOUT HISTORY BUTTON */}
+      {/* BUTTONS */}
       <TouchableOpacity
         style={styles.buttonSecondary}
         onPress={() => navigation.navigate("WorkoutHistory")}
@@ -166,7 +256,6 @@ export default function DashboardScreen({ navigation, route }: any) {
         <Text style={styles.buttonSecondaryText}>Workout History</Text>
       </TouchableOpacity>
 
-      {/* ⭐ WORKOUT SESSIONS HISTORY BUTTON — FIXED */}
       <TouchableOpacity
         style={styles.buttonSecondary}
         onPress={() => navigation.navigate("WorkoutSessionHistory")}
