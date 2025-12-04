@@ -20,9 +20,7 @@ export default function DailyCheckInScreen({ navigation }: any) {
   const [soreness, setSoreness] = useState(5);
   const [energy, setEnergy] = useState(5);
 
-  // ------------------------------------
-  // CALCULATE LOCAL RECOVERY SCORE
-  // ------------------------------------
+  
   const calculateRecovery = () => {
     const s = parseFloat(sleep);
     const h = parseFloat(hrv);
@@ -46,24 +44,26 @@ export default function DailyCheckInScreen({ navigation }: any) {
     return Math.min(10, Math.max(1, Math.round(score)));
   };
 
-  // ------------------------------------
-  // SAVE LOCALLY (OFFLINE SUPPORT)
-  // ------------------------------------
+  
   const saveCheckIn = async (entry: any) => {
     try {
-      const existing = await AsyncStorage.getItem("CHECKIN_HISTORY");
+      const userStr = await AsyncStorage.getItem("user_profile");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const userId = user?.id ?? "default";
+
+      const key = `CHECKIN_HISTORY_${userId}`;
+
+      const existing = await AsyncStorage.getItem(key);
       let history = existing ? JSON.parse(existing) : [];
 
       history.unshift(entry);
-      await AsyncStorage.setItem("CHECKIN_HISTORY", JSON.stringify(history));
+      await AsyncStorage.setItem(key, JSON.stringify(history));
     } catch (err) {
       console.log("Error saving check-in:", err);
     }
   };
 
-  // ------------------------------------
-  // SYNC WEARABLE → BACKEND
-  // ------------------------------------
+  
   const handleSyncWearable = async () => {
     try {
       const token = await AsyncStorage.getItem("auth_token");
@@ -72,7 +72,6 @@ export default function DailyCheckInScreen({ navigation }: any) {
         return;
       }
 
-      // Fake test payload (works with backend today)
       const payload = {
         source: "apple_health",
         measurement_date: new Date().toISOString(),
@@ -92,26 +91,24 @@ export default function DailyCheckInScreen({ navigation }: any) {
 
       Alert.alert("Wearable Synced", "Your wearable data was uploaded.");
       console.log("Wearable sync result:", res);
-
     } catch (err: any) {
       console.log("Wearable sync failed:", err?.response?.data || err);
       Alert.alert("Sync Error", "Unable to sync wearable data.");
     }
   };
 
-  // ------------------------------------
-  // SUBMIT CHECK-IN → BACKEND + LOCAL
-  // ------------------------------------
+  
   const handleSubmit = async () => {
     const score = calculateRecovery();
     if (score === null) return;
 
     const payload = {
-      sleep_hours: parseFloat(sleep),
-      sleep_quality: 0,
-      soreness_level: soreness,
-      energy_level: energy,
-      stress_level: 0,
+      sleep_hours: Math.max(1, parseFloat(sleep) || 0),
+      sleep_quality: 5,
+      soreness_level: Math.max(1, soreness),
+      energy_level: Math.max(1, energy),
+      stress_level: 5,
+      hrv_rmssd: Math.max(1, parseFloat(hrv) || 0),
     };
 
     let entry = {
@@ -121,33 +118,46 @@ export default function DailyCheckInScreen({ navigation }: any) {
       synced: false,
     };
 
-    // Save offline immediately
+   
     await saveCheckIn(entry);
 
     try {
       const token = await AsyncStorage.getItem("auth_token");
 
       if (token) {
-        // POST /recovery/log
         const res = await RecoveryAPI.log(payload, token);
 
         entry.synced = true;
         entry.recoveryScore = res.recovery_score ?? score;
 
-        // Update local history with synced entry
-        const historyStr = await AsyncStorage.getItem("CHECKIN_HISTORY");
-        const history = historyStr ? JSON.parse(historyStr) : [];
-        history[0] = entry;
-        await AsyncStorage.setItem("CHECKIN_HISTORY", JSON.stringify(history));
+       
+        const userStr = await AsyncStorage.getItem("user_profile");
+        const user = userStr ? JSON.parse(userStr) : null;
+        const userId = user?.id ?? "default";
 
-        // Fetch backend REAL latest recovery
+        const key = `CHECKIN_HISTORY_${userId}`;
+
+        const hs = await AsyncStorage.getItem(key);
+        const history = hs ? JSON.parse(hs) : [];
+        history[0] = entry;
+
+        await AsyncStorage.setItem(key, JSON.stringify(history));
+
+        
         try {
           const latest = await RecoveryAPI.latest(token);
-          await AsyncStorage.setItem("LATEST_RECOVERY", JSON.stringify(latest));
 
-          entry.recoveryScore = latest.recovery_score;
+          if (latest) {
+            await AsyncStorage.setItem(
+              "LATEST_RECOVERY",
+              JSON.stringify(latest)
+            );
+            entry.recoveryScore = latest.recovery_score;
+          } else {
+            console.log("No latest recovery (new user). Safe.");
+          }
         } catch (err) {
-          console.log("Failed to fetch latest:", err);
+          console.log("Failed to fetch latest (safe):", err);
         }
       }
     } catch (err: any) {
@@ -157,9 +167,6 @@ export default function DailyCheckInScreen({ navigation }: any) {
     navigation.navigate("Dashboard", { recoveryScore: entry.recoveryScore });
   };
 
-  // ------------------------------------
-  // UI
-  // ------------------------------------
   return (
     <ScrollView
       style={styles.container}
@@ -196,10 +203,7 @@ export default function DailyCheckInScreen({ navigation }: any) {
           onChangeText={setHrv}
         />
 
-        <TouchableOpacity
-          style={styles.syncButton}
-          onPress={handleSyncWearable}
-        >
+        <TouchableOpacity style={styles.syncButton} onPress={handleSyncWearable}>
           <Text style={styles.syncButtonText}>Sync from Wearable</Text>
         </TouchableOpacity>
       </View>
@@ -244,14 +248,11 @@ export default function DailyCheckInScreen({ navigation }: any) {
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Check-In</Text>
       </TouchableOpacity>
-
     </ScrollView>
   );
 }
 
-// ------------------------------------
-// STYLES
-// ------------------------------------
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
