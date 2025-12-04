@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { AuthAPI } from "../../api/api"; // <-- we will create this next
+import { AuthAPI } from "../../api/api"; 
 
 export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
@@ -67,7 +67,7 @@ export default function RegisterScreen({ navigation }: any) {
   );
 }
 
-// ---------- STYLES ----------
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
