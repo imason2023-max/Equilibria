@@ -14,8 +14,17 @@ export default function WorkoutHistoryScreen({ navigation }: any) {
 
   const loadWorkouts = async () => {
     try {
-      const raw = await AsyncStorage.getItem("WORKOUT_HISTORY");
+      
+      const userStr = await AsyncStorage.getItem("user"); 
+      const user = userStr ? JSON.parse(userStr) : null;
+      const userId = user?.id ?? "default";
+
+      
+      const key = `WORKOUT_HISTORY_${userId}`;
+
+      const raw = await AsyncStorage.getItem(key);
       const history = raw ? JSON.parse(raw) : [];
+
       setWorkouts(history);
     } catch (err) {
       console.log("Error loading workout history:", err);
