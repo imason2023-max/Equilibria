@@ -27,9 +27,6 @@ export default function LogWorkoutSessionScreen({ navigation, route }: any) {
     );
   };
 
-  // ------------------------------------------------
-  // SAVE SESSION + AUTO-NAVIGATE TO DETAILS
-  // ------------------------------------------------
   const saveSession = async () => {
     if (!duration) {
       Alert.alert("Missing Duration", "Please enter workout duration.");
@@ -46,7 +43,7 @@ export default function LogWorkoutSessionScreen({ navigation, route }: any) {
       synced: false,
     };
 
-    // 1️⃣ Save locally
+    
     try {
       const raw = await AsyncStorage.getItem("WORKOUT_SESSIONS");
       const history = raw ? JSON.parse(raw) : [];
@@ -57,7 +54,7 @@ export default function LogWorkoutSessionScreen({ navigation, route }: any) {
       console.log("Session local save error:", err);
     }
 
-    // 2️⃣ Sync with backend
+    
     try {
       const token = await AsyncStorage.getItem("auth_token");
 
@@ -71,7 +68,7 @@ export default function LogWorkoutSessionScreen({ navigation, route }: any) {
 
         const backendRes = await WorkoutSessionAPI.log(payload, token);
 
-        // Update local entry
+        
         const raw = await AsyncStorage.getItem("WORKOUT_SESSIONS");
         const history = raw ? JSON.parse(raw) : [];
 
@@ -84,7 +81,7 @@ export default function LogWorkoutSessionScreen({ navigation, route }: any) {
       console.log("Session sync error:", err);
     }
 
-    // 3️⃣ Navigate straight to DETAILS screen
+    
     navigation.navigate("WorkoutSessionDetails", {
       sessionId: session.id,
     });
@@ -148,9 +145,7 @@ export default function LogWorkoutSessionScreen({ navigation, route }: any) {
   );
 }
 
-// ------------------------------------------------
-// STYLES
-// ------------------------------------------------
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
