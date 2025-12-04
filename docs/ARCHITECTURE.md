@@ -1,6 +1,6 @@
 # Equilibria System Architecture
 
-**Director: Ian Mason**
+**Director/Project Lead: Ian Mason**
 
 ## Overview
 
