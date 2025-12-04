@@ -12,9 +12,6 @@ import { BarChart, LineChart } from "react-native-chart-kit";
 
 const screenWidth = Dimensions.get("window").width;
 
-// ----------------------------
-// CHART CONFIG
-// ----------------------------
 const chartConfig = {
   backgroundColor: "#1A1A1A",
   backgroundGradientFrom: "#1A1A1A",
@@ -36,56 +33,61 @@ const chartConfig = {
 const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
 export default function WeeklyInsightsScreen({ navigation }: any) {
-  const [weeklyScores, setWeeklyScores] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
-  const [weeklyVolume, setWeeklyVolume] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
+  const [weeklyScores, setWeeklyScores] = useState<number[]>([0,0,0,0,0,0,0]);
+  const [weeklyVolume, setWeeklyVolume] = useState<number[]>([0,0,0,0,0,0,0]);
   const [weeklyAvg, setWeeklyAvg] = useState<number | null>(null);
   const [pendingSync, setPendingSync] = useState<number>(0);
 
-  // ----------------------------
-  // LOAD HISTORY FROM STORAGE
-  // ----------------------------
   const loadData = async () => {
     try {
-      // ----- LOAD CHECK-IN HISTORY -----
-      const rawCheckins = await AsyncStorage.getItem("CHECKIN_HISTORY");
+     
+      const userStr = await AsyncStorage.getItem("user_profile");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const userId = user?.id ?? "default";
+
+      const checkinKey = `CHECKIN_HISTORY_${userId}`;
+      const workoutKey = `WORKOUT_HISTORY_${userId}`;
+
+     
+      const rawCheckins = await AsyncStorage.getItem(checkinKey);
       const checkins = rawCheckins ? JSON.parse(rawCheckins) : [];
-      const last7Checkins = checkins.slice(0, 7);
 
-      const scores = last7Checkins.map((item: any) => item.recoveryScore);
+      let weekData = [0, 0, 0, 0, 0, 0, 0];
 
-      while (scores.length < 7) scores.push(0);
+      checkins.slice(0, 7).forEach((c: any) => {
+        const day = new Date(c.timestamp).getDay();
+        const index = day === 0 ? 6 : day - 1; 
+        weekData[index] = c.recoveryScore;
+      });
 
-      // Prevent Infinity / NaN crash
-      const safeScores = scores.map((v: number) => (isFinite(v) ? v : 0));
+      setWeeklyScores(weekData);
 
-
-      setWeeklyScores(safeScores.reverse());
-
-      if (last7Checkins.length > 0) {
+      
+      if (checkins.length > 0) {
         const avg =
-          last7Checkins.reduce(
-            (sum: number, x: any) => sum + x.recoveryScore,
-            0
-          ) / last7Checkins.length;
+          checkins
+            .slice(0, 7)
+            .reduce((sum: number, c: any) => sum + c.recoveryScore, 0) /
+          Math.min(7, checkins.length);
 
         setWeeklyAvg(Number(avg.toFixed(1)));
       }
 
-      // ----- LOAD WORKOUT HISTORY -----
-      const rawWorkouts = await AsyncStorage.getItem("WORKOUT_HISTORY");
+      
+      const rawWorkouts = await AsyncStorage.getItem(workoutKey);
       const workouts = rawWorkouts ? JSON.parse(rawWorkouts) : [];
-      const last7Workouts = workouts.slice(0, 7);
 
-      const volume = last7Workouts.map((w: any) => w.totalVolume);
+      let weekVolumeData = [0, 0, 0, 0, 0, 0, 0]; 
 
-      while (volume.length < 7) volume.push(0);
+      workouts.slice(0, 7).forEach((w: any) => {
+        const day = new Date(w.timestamp).getDay(); 
+        const index = day === 0 ? 6 : day - 1; 
+        weekVolumeData[index] = w.totalVolume;
+      });
 
-      const safeVolume = volume.map((v: number) => (isFinite(v) ? v : 0));
+      setWeeklyVolume(weekVolumeData);
 
-
-      setWeeklyVolume(safeVolume.reverse());
-
-      // ----- SYNC PENDING COUNT -----
+     
       let pending = 0;
       pending += checkins.filter((c: any) => !c.synced).length;
       pending += workouts.filter((w: any) => !w.synced).length;
@@ -102,15 +104,10 @@ export default function WeeklyInsightsScreen({ navigation }: any) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* BACK BUTTON */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
 
-      {/* HEADER */}
       <Text style={styles.header}>Weekly Insights</Text>
       <Text style={styles.subheader}>Your 7-day performance summary</Text>
 
@@ -129,23 +126,16 @@ export default function WeeklyInsightsScreen({ navigation }: any) {
         <Text style={styles.cardTitle}>Recovery Trend</Text>
 
         <LineChart
-          data={{
-            labels: WEEK_LABELS,
-            datasets: [{ data: weeklyScores }],
-          }}
+          data={{ labels: WEEK_LABELS, datasets: [{ data: weeklyScores }] }}
           width={screenWidth - 70}
           height={220}
           chartConfig={chartConfig}
           bezier
-          withInnerLines
           fromZero
           style={styles.chart}
         />
 
-        <Text style={styles.statTitle}>
-          Avg Recovery: {weeklyAvg ?? "--"}/10
-        </Text>
-
+        <Text style={styles.statTitle}>Avg Recovery: {weeklyAvg ?? "--"}/10</Text>
         <Text style={styles.statSubtitle}>
           {weeklyAvg === null
             ? "Not enough data — complete more check-ins."
@@ -160,17 +150,13 @@ export default function WeeklyInsightsScreen({ navigation }: any) {
         <Text style={styles.cardTitle}>Training Volume (Sets)</Text>
 
         <BarChart
-          data={{
-            labels: WEEK_LABELS,
-            datasets: [{ data: weeklyVolume }],
-          }}
+          data={{ labels: WEEK_LABELS, datasets: [{ data: weeklyVolume }] }}
           width={screenWidth - 70}
           height={220}
           chartConfig={chartConfig}
           fromZero
-          withInnerLines
-          yAxisLabel=""     // ← REQUIRED FIX
-          yAxisSuffix=""    // ← REQUIRED FIX
+          yAxisLabel=""
+          yAxisSuffix=""
           style={styles.chart}
         />
 
@@ -189,12 +175,8 @@ export default function WeeklyInsightsScreen({ navigation }: any) {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Summary</Text>
 
-        <Text style={styles.summaryPoint}>
-          • Last Score: {weeklyScores[6] ?? "--"}/10
-        </Text>
-        <Text style={styles.summaryPoint}>
-          • Average Recovery: {weeklyAvg ?? "--"}/10
-        </Text>
+        <Text style={styles.summaryPoint}>• Last Score: {weeklyScores[6]}/10</Text>
+        <Text style={styles.summaryPoint}>• Avg Recovery: {weeklyAvg ?? "--"}/10</Text>
         <Text style={styles.summaryPoint}>
           • Total Volume: {weeklyVolume.reduce((a, b) => a + b, 0)} sets
         </Text>
@@ -203,9 +185,7 @@ export default function WeeklyInsightsScreen({ navigation }: any) {
   );
 }
 
-// ----------------------------
-// STYLES
-// ----------------------------
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -213,33 +193,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
   },
-
   backButton: {
     paddingVertical: 10,
     paddingHorizontal: 5,
     marginBottom: 10,
   },
-
   backButtonText: {
     color: "#4CC9F0",
     fontSize: 18,
     fontWeight: "600",
   },
-
   header: {
     color: "#fff",
     fontSize: 32,
     fontWeight: "700",
     textAlign: "center",
   },
-
   subheader: {
     color: "#888",
     fontSize: 16,
     textAlign: "center",
     marginBottom: 30,
   },
-
   syncCard: {
     backgroundColor: "#1A1A1A",
     padding: 20,
@@ -248,26 +223,22 @@ const styles = StyleSheet.create({
     borderColor: "#2A2A2A",
     marginBottom: 25,
   },
-
   syncTitle: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 6,
   },
-
   syncPending: {
     color: "#ffcc00",
     fontSize: 16,
     fontWeight: "700",
   },
-
   syncGood: {
     color: "#4CC9F0",
     fontSize: 16,
     fontWeight: "700",
   },
-
   card: {
     backgroundColor: "#1A1A1A",
     padding: 20,
@@ -276,39 +247,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#222",
   },
-
   cardTitle: {
     color: "#fff",
     fontSize: 22,
     fontWeight: "700",
     marginBottom: 15,
   },
-
   chart: {
     borderRadius: 14,
     marginBottom: 15,
   },
-
   statTitle: {
     color: "#4CC9F0",
     fontSize: 18,
     fontWeight: "700",
     marginTop: 5,
   },
-
   statSubtitle: {
     color: "#aaa",
     fontSize: 14,
     marginTop: 2,
   },
-
   statWarning: {
     color: "#ff5555",
     fontSize: 14,
     marginTop: 5,
     fontWeight: "600",
   },
-
   summaryPoint: {
     color: "#ccc",
     fontSize: 15,
