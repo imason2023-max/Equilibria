@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import DailyCheckInScreen from "../screens/DailyCheckInScreen";
 import DashboardScreen from "../screens/DashboardScreen";
+import SettingsScreen from "../screens/SettingsScreen"; 
 import WeeklyInsightsScreen from "../screens/WeeklyInsightsScreen";
 import WorkoutBuilderScreen from "../screens/WorkoutBuilderScreen";
 
@@ -25,6 +26,9 @@ export default function TabsNavigator() {
       <Tab.Screen name="DailyCheckIn" component={DailyCheckInScreen} />
       <Tab.Screen name="Builder" component={WorkoutBuilderScreen} />
       <Tab.Screen name="Insights" component={WeeklyInsightsScreen} />
+
+      {/*  Add logout button here */}
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
