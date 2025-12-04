@@ -4,7 +4,7 @@
 
 ## Overview
 
-Equilibria is a recovery-focused fitness application that helps users optimize their training by monitoring recovery metrics and providing intelligent workout recommendations. The system uses a modern microservices architecture with a React Native mobile frontend, FastAPI backend, and PostgreSQL database.
+Equilibria is a recovery-focused fitness application that helps users optimize their training by monitoring recovery metrics and providing intelligent workout recommendations. The system uses a modern client–server architecture with a React Native mobile frontend, FastAPI backend, and PostgreSQL database.
 
 ---
 
@@ -66,7 +66,7 @@ Equilibria is a recovery-focused fitness application that helps users optimize t
 │                    DATA LAYER (Render)                           │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │              PostgreSQL 18 Database                       │  │
+│  │                PostgreSQL  Database                       │  │
 │  │                                                            │  │
 │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐  │  │
 │  │  │  users   │  │ recovery │  │ workouts │  │wearable │  │  │
@@ -177,6 +177,7 @@ Equilibria is a recovery-focused fitness application that helps users optimize t
 ### 3. Business Logic Layer
 
 #### 3a. Recovery Engine (Fenthon Aristhomene)
+##### Backend Support & Testing (Kadeem Wilks)
 
 **Algorithm Overview:**
 
@@ -251,7 +252,7 @@ Tracks exercise performance over time:
 
 ### 4. Data Layer
 
-#### 4a. PostgreSQL Database (Version 18)
+#### 4a. PostgreSQL Database 
 
 **Database Schema:**
 
@@ -622,6 +623,13 @@ logger.info(
 - `GET /api/v1/recovery/latest` - Get latest score
 - `POST /api/v1/workouts/` - Create workout
 - `POST /api/v1/wearables/sync` - Sync wearable data
+
+---
+
+---
+## Known Limitations
+
+- No push notifications implemented in this phase
 
 ---
 
