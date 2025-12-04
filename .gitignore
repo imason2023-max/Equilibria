@@ -1,40 +1,60 @@
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-*.egg-info/
-dist/
-build/
-
-# Virtual envs
+*$py.class
+.Python
+env/
 venv/
-.env
-.env.*/
-.venv/
 
-# Node / React Native
+# Node/JavaScript dependencies
 node_modules/
-npm-debug.log*
-yarn-error.log*
+
+# Expo/React Native
 .expo/
-.expo-shared/
 dist/
-build/
+web-build/
+expo-env.d.ts
 
-# OS junk
-.DS_Store
-Thumbs.db
+# Native mobile
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
-# Logs
-logs/
-*.log
+# Metro bundler
+.metro-health-check*
 
-# IDEs
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Environment files
+.env
+.env*.local
+
+# IDE/Editor
 .vscode/
 .idea/
 
-# Docker artifacts
-*.pid
-*.seed
-*.tar
+# Databases
+*.db
+*.sqlite3
+
+# TypeScript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+*.pem
+
+# Windows
+Thumbs.db
+
+# Example/Generated folders
+app-example
+/ios
+/android
