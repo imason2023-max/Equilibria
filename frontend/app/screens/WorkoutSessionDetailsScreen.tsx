@@ -11,7 +11,7 @@ import BackButton from "../components/BackButton";
 
 export default function WorkoutSessionDetailsScreen({ navigation, route }: any) {
 
-  // 🛑 PREVENT CRASH: route.params may be undefined
+  
   if (!route?.params?.sessionId) {
     return (
       <View style={styles.container}>
@@ -28,7 +28,7 @@ export default function WorkoutSessionDetailsScreen({ navigation, route }: any) 
     );
   }
 
-  // 🟢 Safe now
+  
   const { sessionId } = route.params;
 
   const [session, setSession] = useState<any>(null);
@@ -100,9 +100,7 @@ export default function WorkoutSessionDetailsScreen({ navigation, route }: any) 
   );
 }
 
-// -----------------------
-// STYLES
-// -----------------------
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
