@@ -15,7 +15,7 @@ export default function WorkoutSessionHistoryScreen({ navigation }: any) {
     const raw = await AsyncStorage.getItem("WORKOUT_SESSIONS");
     const history = raw ? JSON.parse(raw) : [];
 
-    // Sort newest first
+   
     history.sort(
       (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
